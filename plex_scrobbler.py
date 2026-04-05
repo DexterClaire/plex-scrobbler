@@ -445,10 +445,16 @@ def process_line(line, sources):
             if (sess.get("state") == "playing"
                     and np_key not in _now_playing_sent):
                 source_name, enabled = source_enabled_for_device(device, sources)
-                if enabled:
+                if source_name:
                     track = get_track_metadata(rating_key)
-                    if track:
-                        lastfm_now_playing(track)
+                    if enabled:
+                        if track:
+                            lastfm_now_playing(track)
+                    else:
+                        if track:
+                            log.info(f"Now playing on '{source_name}' (scrobbling disabled): {track['artist']} — {track['title']}")
+                        else:
+                            log.info(f"Now playing on '{source_name}' (scrobbling disabled): ratingKey={rating_key}")
                 _now_playing_sent.add(np_key)
         return
 
