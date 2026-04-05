@@ -1,0 +1,17 @@
+[plex]
+url   = http://localhost:32400
+token = YOUR_PLEX_TOKEN
+log   = C:\Users\USERNAME\AppData\Local\Plex Media Server\Logs\Plex Media Server.log
+
+[lastfm]
+api_key      = YOUR_LASTFM_API_KEY
+api_secret   = YOUR_LASTFM_API_SECRET
+username     = YOUR_LASTFM_USERNAME
+; md5 hash of your password
+; python -c "import hashlib; print(hashlib.md5(b'yourpassword').hexdigest())"
+password_md5 = YOUR_PASSWORD_MD5_HASH
+
+[scrobbler]
+poll_seconds = 2
+log_max_mb   = 1
+log_backups  = 3

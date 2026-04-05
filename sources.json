@@ -1,0 +1,22 @@
+{
+  "Plexamp iOS": {
+    "match": "iOS (iPhone)",
+    "enabled": true
+  },
+  "Plex Mobile": {
+    "match": "iOS (iPad)",
+    "enabled": true
+  },
+  "Plex Web": {
+    "match": "Chrome (Chrome)",
+    "enabled": false
+  },
+  "WiiM Ultra": {
+    "match": "WiiM Ultra",
+    "enabled": false
+  },
+  "WiiM Home App": {
+    "match": "WiiM",
+    "enabled": false
+  }
+}
