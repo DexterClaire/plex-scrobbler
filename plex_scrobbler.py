@@ -411,21 +411,56 @@ def process_line(line, sources):
         rating_key  = m.group("ratingKey")
 
         if req not in sessions:
-            sessions[req] = {"client": client, "device": None,
+            prev_req       = client_to_req.get(client)
+            prev_device    = None
+            prev_scrobbled = False
+            if prev_req and prev_req in sessions:
+                prev_sess       = sessions[prev_req]
+                prev_rating_key = prev_sess.get("ratingKey")
+                prev_device     = prev_sess.get("device")
+                if prev_rating_key != rating_key:
+                    # Track changed — clear old now playing marker.
+                    _now_playing_sent.discard((client, prev_rating_key))
+                else:
+                    # Same track continuing — carry scrobbled flag to suppress
+                    # spurious now playing re-sends after the 50% mark.
+                    prev_scrobbled = prev_sess.get("scrobbled", False)
+            sessions[req] = {"client": client, "device": prev_device,
                              "ratingKey": rating_key,
                              "state": new_state, "scrobbled": False}
         else:
             prev_rating_key = sessions[req].get("ratingKey")
+            prev_scrobbled  = False
             sessions[req]["state"]     = new_state
             sessions[req]["ratingKey"] = rating_key
 
-            # Track changed — clear now playing record and scrobble flag
-            # so the new track gets fresh calls.
             if rating_key != prev_rating_key:
                 _now_playing_sent.discard((client, prev_rating_key))
                 sessions[req]["scrobbled"] = False
 
         client_to_req[client] = req
+
+        # If device is already known (carried from previous session), trigger
+        # now playing — but only if the track hasn't already been scrobbled this
+        # play-through (prev_scrobbled guards against re-sending after the 50% mark).
+        sess   = sessions[req]
+        device = sess.get("device")
+        np_key = (client, rating_key)
+        if (new_state == "playing" and device is not None
+                and not prev_scrobbled
+                and np_key not in _now_playing_sent):
+            source_name, enabled = source_enabled_for_device(device, sources)
+            if source_name:
+                track = get_track_metadata(rating_key)
+                if enabled:
+                    if track:
+                        lastfm_now_playing(track)
+                else:
+                    if track:
+                        log.info(f"Now playing on '{source_name}' (scrobbling disabled): {track['artist']} — {track['title']}")
+                    else:
+                        log.info(f"Now playing on '{source_name}' (scrobbling disabled): ratingKey={rating_key}")
+            _now_playing_sent.add(np_key)
         return
 
     m = RE_DEVICE.search(line)

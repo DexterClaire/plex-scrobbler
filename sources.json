@@ -18,5 +18,9 @@
   "WiiM Home App": {
     "match": "WiiM",
     "enabled": false
+  },
+  "Bedroom TV": {
+    "match": "TCL Roku TV",
+    "enabled": true
   }
 }
